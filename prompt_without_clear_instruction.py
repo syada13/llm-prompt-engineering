@@ -1,10 +1,4 @@
-import os
-import openai
-from dotenv import load_dotenv
-from prompting_with_clear_instructions import get_chat_completion
-
-load_dotenv()
-openai.api_key = os.getenv('OPENAI_API_KEY')
+from  chat_completion import get_chat_completion
 
 system_message = """
 You are an AI assistant that helps humans by generating tutorials given a text.
@@ -12,12 +6,12 @@ You will be provided with text.If the text contains any kind of instructions on 
 Otherwise, inform the user that the text does not contain any instructions.
 Text:
 """
-vauge_instruction ="""
+vague_instruction ="""
 The sun is shining and dogs are running on the beach.
 """
 messages = [
     {"role": "system", "content": system_message},
-    {"role": "user", "content": vauge_instruction}
+    {"role": "user", "content": vague_instruction}
 ]
 
 # Call get_chat_completion method with prompt to get response from model

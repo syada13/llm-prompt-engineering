@@ -1,10 +1,4 @@
-import os
-import openai
-from dotenv import load_dotenv
-from prompting_with_clear_instructions import get_chat_completion
-
-load_dotenv()
-openai.api_key= os.getenv('OPENAI_API_KEY')
+from  chat_completion import get_chat_completion
 
 unordered_system_message ="""
 You are a sentiment analyzer. You classify conversations into three categories: positive, negative and neutral
