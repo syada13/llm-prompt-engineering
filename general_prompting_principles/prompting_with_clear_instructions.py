@@ -1,4 +1,5 @@
-from  chat_completion import get_chat_completion
+from general_prompting_principles.chat_completion import get_chat_completion
+
 
 system_message = """
 You are an AI assistant that helps humans by generating tutorials given a text.
@@ -6,15 +7,19 @@ You will be provided with text.If the text contains any kind of instructions on 
 Otherwise, inform the user that the text does not contain any instructions.
 Text:
 """
-vague_instruction ="""
-The sun is shining and dogs are running on the beach.
+instructions = """
+To prepare the known sauce from Genova, Italy, you can start by toasting the pine nuts to then coarsely
+chop them in a kitchen mortar together with basil and garlic. Then, add half of the oil in the kitchen mortar and season with salt and pepper.
+Finally, transfer the pesto to a bowl and stir in the grated Parmesan cheese.
 """
+
+
 messages = [
     {"role": "system", "content": system_message},
-    {"role": "user", "content": vague_instruction}
+    {"role": "user", "content": instructions}
 ]
 
-# Call get_chat_completion method with prompt to get response from model
+
 model_response = get_chat_completion(messages)
 print(model_response)
 

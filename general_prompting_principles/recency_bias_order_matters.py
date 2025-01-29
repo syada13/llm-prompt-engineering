@@ -1,4 +1,4 @@
-from  chat_completion import get_chat_completion
+from general_prompting_principles.chat_completion import get_chat_completion
 
 unordered_system_message ="""
 You are a sentiment analyzer. You classify conversations into three categories: positive, negative and neutral

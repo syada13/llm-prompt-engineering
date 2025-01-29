@@ -1,4 +1,4 @@
-from  chat_completion import get_chat_completion
+from general_prompting_principles.chat_completion import get_chat_completion
 
 system_message ="""
 You are a Python expert who produces python code based on user's request.
