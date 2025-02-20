@@ -1,7 +1,7 @@
 from langchain.llms import OpenAI
 from langchain import PromptTemplate
 
-llm = OpenAI(openai_api_key)
+llm = OpenAI(temperature=0)
 print(llm("tell me a joke"))
 
 template ="""Sentence:{sentence}
