@@ -37,6 +37,17 @@ print(docs[0])
 
 #OUTPUT - I want to report an accident
 
+# Retriever
+from langchain.chains import RetrievalQA
+from langchain.llm import OpenAI
+
+retriever = db.as_retriever()
+qa = RetrievalQA.from_chain_type(llm=OpenAI(),chain_type="stuff",retriever=retriever)
+query = "What was the reason of the call?"
+qa.run(query)
+
+#OUTPUT - The reason for the call was to report an accident.
+
 
 
 
