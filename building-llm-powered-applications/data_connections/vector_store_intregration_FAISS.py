@@ -39,7 +39,7 @@ print(docs[0])
 
 # Retriever
 from langchain.chains import RetrievalQA
-from langchain.llm import OpenAI
+from langchain.llms import OpenAI
 
 retriever = db.as_retriever()
 qa = RetrievalQA.from_chain_type(llm=OpenAI(),chain_type="stuff",retriever=retriever)
