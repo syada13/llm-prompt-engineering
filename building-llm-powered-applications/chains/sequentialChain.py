@@ -1,7 +1,6 @@
 from langchain.chains import LLMChain,SimpleSequentialChain
 from langchain.llms import OpenAI
 from langchain.prompts import PromptTemplate
-from langchain.chains import Simple
 from dotenv import load_dotenv
 import os
 
