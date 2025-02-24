@@ -5,32 +5,33 @@ from langchain.chat_models import ChatOpenAI
 from dotenv import load_dotenv
 import os
 
+from advance_prompting_techniques.ReAct import agent_executor
 from general_prompting_principles.recency_bias_order_matters import conversation
 
 load_dotenv()
 openai_api_key = os.getenv("OPENAI_API_KEY")
 temperature = 0
 
-chat = ChatOpenAI(temperature = 0)
+llm = ChatOpenAI(temperature = 0)
 messages = [
     SystemMessage(content="You are a helpful assistant that help the user to plan an optimized itinerary."),
-    HumanMessage(content="I'm going to India for 2 days, what can I visit?")
+    HumanMessage(content="I'm going to Rome for 2 days, what can I visit?")
 ]
 
-output = chat(messages)
+output = llm(messages)
 print(output.content)
 
 from langchain.memory import ConversationBufferMemory
 memory = ConversationBufferMemory()
 conversation = ConversationChain(
-    llm =chat,
+    llm =llm,
     memory=memory,
     Verbose=True
 )
 
 # Conversation between Chat bot and user with ability to keep conversation history in memory
 conversation.run("Hi there !")
-conversation.run("What is the most iconic place in India?")
+conversation.run("What is the most iconic place in Italy?")
 conversation.run("What kind of other events?")
 
 #Make conversation interactive
@@ -78,10 +79,38 @@ memory = ConversationBufferMemory(
 # If you want to pass a custom prompt, you can do so using the condense_question_prompt parameter in the ConversationalRetrievalChain.from_llm module.
 
 query_chain = ConversationalRetrievalChain.from_llm(
-    llm=chat,
+    llm=llm,
     retriever=db.as_retriever(),
     memory=memory,
     verbose=True
 )
 
-query_chain.run({'question':'Give me some review about the Tajmahal'})
+query_chain.run({'question':'Give me some review about Pantheon'})
+
+
+#Make our chat bot agentic
+from langchain.agents.agent_toolkits import create_retriever_tool,create_conversational_retrieval_agent
+
+#create_retriever_tool method creates a custom tool that acts as a retriever for an agent. It will need a database to retrieve from, a name,
+# and a short description, so that the model can understand when to use it.
+tool =retriever = create_retriever_tool(
+    db.as_retriever(),
+    "italy_travler",
+"Searches and returns documents regarding Italy."
+)
+
+tools =[tool]
+
+
+
+#create_conversational_retrieval_agent: This method initializes a conversational agent that is configured to work with
+# retrievers and chat models. It will need an LLM, a list of tools (in our case, the retriever),
+# and a memory key to keep track of the previous chat history.
+
+agent_executor = create_conversational_retrieval_agent(llm,tools,memory_key='chat_history', verbose=True)
+
+#Question -1 related to italy document
+agent_executor({"input": "Tell me something about Pantheon"})
+
+#Question -2  NOT related to the saved document
+agent_executor({"input": "what can I visit in India in 3 days?"})
