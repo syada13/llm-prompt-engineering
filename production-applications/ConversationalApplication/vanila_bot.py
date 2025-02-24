@@ -5,6 +5,8 @@ from langchain.chat_models import ChatOpenAI
 from dotenv import load_dotenv
 import os
 
+from langchain_core.messages import ToolCall
+
 from advance_prompting_techniques.ReAct import agent_executor
 from general_prompting_principles.recency_bias_order_matters import conversation
 
@@ -90,27 +92,43 @@ query_chain.run({'question':'Give me some review about Pantheon'})
 
 #Make our chat bot agentic
 from langchain.agents.agent_toolkits import create_retriever_tool,create_conversational_retrieval_agent
+from langchain.tools import Tool
+from langchain import SerpAPIWrapper
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+os.environ["SERPAPI_API_KEY"]
+search = SerpAPIWrapper()
+
 
 #create_retriever_tool method creates a custom tool that acts as a retriever for an agent. It will need a database to retrieve from, a name,
 # and a short description, so that the model can understand when to use it.
-tool =retriever = create_retriever_tool(
-    db.as_retriever(),
-    "italy_travler",
-"Searches and returns documents regarding Italy."
-)
 
-tools =[tool]
+tools =[
+      Tool.from_function(
+          func=search.run,
+          name="Google Search",
+          description="useful for when you need to answer questions about current events"
+      ),
+      create_retriever_tool(
+      db.as_retriever(),
+     "italy_travler",
+    "Searches and returns documents regarding Italy."
+)]
 
-
-
-#create_conversational_retrieval_agent: This method initializes a conversational agent that is configured to work with
-# retrievers and chat models. It will need an LLM, a list of tools (in our case, the retriever),
-# and a memory key to keep track of the previous chat history.
 
 agent_executor = create_conversational_retrieval_agent(llm,tools,memory_key='chat_history', verbose=True)
 
-#Question -1 related to italy document
-agent_executor({"input": "Tell me something about Pantheon"})
-
-#Question -2  NOT related to the saved document
+#Question -1
+#The model doesn’t need external knowledge to answer the question, hence it is responding without invoking any tool.
 agent_executor({"input": "what can I visit in India in 3 days?"})
+
+#Question -2.
+#The agent will invoke the Google Search tool; this is due to the reasoning capability of the underlying
+# gpt-3.5-turbo model, which captures the user’s intent and dynamically understands which tool to use to accomplish the request.
+
+agent_executor({"input": "What is the weather currently in Delhi?"})
+
+#Question -3 The agent will invoke the document retriever to provide the  output pertaining to Italy information saved in FAISS vector store
+agent_executor({"input": "I’m traveling to Italy. Can you give me some suggestions for the main attractions to visit?"})
