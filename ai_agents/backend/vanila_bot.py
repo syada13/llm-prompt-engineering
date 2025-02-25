@@ -55,7 +55,7 @@ from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
 
 # Load Italy_travel.pdf
-raw_documents = PyPDFLoader("italy_travel.pdf").load()
+raw_documents = PyPDFLoader("../frontend/italy_travel.pdf").load()
 
 #Initialize TextSplitter to split loaded document
 text_splitter = RecursiveCharacterTextSplitter(

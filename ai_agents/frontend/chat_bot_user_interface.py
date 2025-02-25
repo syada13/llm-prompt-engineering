@@ -2,13 +2,11 @@
 import streamlit  as st
 from streamlit.external.langchain import StreamlitCallbackHandler
 
-from general_prompting_principles.generate_multiple_answers_and_choose_the_best import response
-
 st.set_page_config(page_title="Travlet")
 st.header(('Welcome to Travlet, your travel assistant with Internet access. What are you planning for your next trip?'))
 
 #2 Initializing the LangChain backbone components we need.
-from langchain import SerpAPIWrapper
+from langchain.utilities import SerpAPIWrapper
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.document_loaders import PyPDFLoader
 from langchain.vectorstores import FAISS
@@ -21,14 +19,41 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-serpapi_api_key =os.getenv("SERPAPI_API_KEY")
+os.environ["SERPAPI_API_KEY"]
+openai_api_key =os.getenv("OPENAI_API_KEY")
 
-search = SerpAPIWrapper(serpapi_api_key)
+search = SerpAPIWrapper()
 text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=1500,
             chunk_overlap=200
         )
-raw_documents = PyPDFLoader('italy_travel.pdf').load()
+
+import os
+
+# Base directory and filename
+base_dir = '//Users/sureshyadav/llm-prompt-engineering/ai_agents/'
+filename = 'italy_travel.pdf'
+
+# Construct the full path
+full_path = os.path.join(base_dir, filename)
+print(full_path)
+
+
+
+import streamlit as st
+from PyPDF2 import PdfReader
+from langchain.docstore.document import Document
+
+uploaded_file = st.file_uploader("italy_travel.pdf")
+raw_documents = []
+if uploaded_file is not None:
+    reader = PdfReader(uploaded_file)
+    i = 1
+    for page in reader.pages:
+        raw_documents.append(Document(page_content=page.extract_text(), metadata={'page':i}))
+        i += 1
+
+#raw_documents = PyPDFLoader(full_path).load()
 documents = text_splitter.split_documents(raw_documents)
 db = FAISS.from_documents(documents, OpenAIEmbeddings())
 memory = ConversationBufferMemory(
@@ -37,7 +62,7 @@ memory = ConversationBufferMemory(
     output_key="output"
 )
 
-llm = ChatOpenAI()
+llm = ChatOpenAI(openai_api_key)
 tools = [
     Tool.from_function(
         func=search.run,
