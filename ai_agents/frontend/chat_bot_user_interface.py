@@ -1,5 +1,10 @@
 #1. Setting the configuration of the webpage:
+from typing import Optional, Union, Any
+from uuid import UUID
+
 import streamlit  as st
+from langchain_core.outputs import GenerationChunk, ChatGenerationChunk
+from numpy.f2py.cfuncs import callbacks
 from streamlit.external.langchain import StreamlitCallbackHandler
 
 st.set_page_config(page_title="Travlet")
@@ -111,7 +116,26 @@ if st.sidebar.button('"Reset chat history"'):
     st.session_state.messages = []
 
 
+# Give streaming experience to user while chatting with bot
+
+from langchain.callbacks.base import BaseCallbackHandler
+from langchain.schema import ChatMessage
+from langchain_openai import ChatOpenAI
 
 
+class StreamHandler(BaseCallbackHandler):
+    def __init__(self, container, initial_text= ''):
+        self.container = container
+        self.text = initial_text
+
+    def non_llm_new_token(self, token: str, **kwargs) -> None:
+        self.text += token
+        self.container.markdown(self.text)
 
 
+#The StreamHandler is designed to capture and display streaming data, such as text or other content, in a designated container.
+with st.chat_message("assistant"):
+    stream_handler = StreamHandler(st.empty())
+    llm = ChatOpenAI(streaming=True,callbacks=[stream_handler])
+    response=llm.invoke(st.session_state.messages)
+    st.session_state.messages.append(ChatMessage(role="assistant", content=response.content))
