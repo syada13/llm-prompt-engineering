@@ -36,7 +36,7 @@ text_splitter = RecursiveCharacterTextSplitter(
 import os
 
 # Base directory and filename
-base_dir = '//Users/sureshyadav/llm-prompt-engineering/ai_agents/'
+base_dir = '/conversational_ai_chat_bot/'
 filename = 'italy_travel.pdf'
 
 # Construct the full path
