@@ -61,8 +61,16 @@ md_final["embedding"] = md_final.overview.apply(lambda x: get_embedding(x, engin
 md_final.rename(columns={'embedding': 'vector'},inplace=True)
 md_final.rename(columns = {'combined_info': 'text'}, inplace = True)
 
-# Convert Python objects into Byte stream
+# Convert Python objects into Byte stream and read it.
 md_final.to_pickle('movies.pkl')
+md = pd.read_pickle('movies.pkl')
+
+# Use lanceDB,a open-source vectorDB for vector-search built with persistent storage
+import lancedb
+uri = "data/sample-lancedb"
+db = lancedb.connect(uri)
+table = db.create_table("movies", md)
+
 
 
 
