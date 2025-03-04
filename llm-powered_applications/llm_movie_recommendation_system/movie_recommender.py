@@ -37,6 +37,39 @@ md_final = md[[['genres', 'title', 'overview', 'weighted_rate']]].reset_index(dr
 md_final['combined_info'] = md_final.apply(lambda row: f"Title: {row['title']}. Overview: {row['overview']} Genres: {', '.join(row['genres'])}. Rating: {row['weighted_rate']}", axis=1)
 
 
+#Embedding
+
+import tiktoken
+import os
+import openai
+from openai.embeddings_utils import get_embedding
+
+#OpenAI api key setup
+openai.api_key = os.environ['OPENAI_API_KEY']
+
+#embedding model parameters
+embedding_model = "text_embedding-ada-002"
+embedding_encoding ="cl100k_base"
+max_tokens=8000 # the maximum for text-embedding-ada-002 is 8191
+encoding = tiktoken.get_encoding(embedding_encoding)
+
+# omit reviews that are too long to embed
+md_final["n_tokens"] = md_final.combined_info.apply(lambda x: len(encoding.encode(x)))
+md_final = md_final[md_final.n_tokens <= max_tokens]
+
+md_final["embedding"] = md_final.overview.apply(lambda x: get_embedding(x, engine=embedding_model))
+md_final.rename(columns={'embedding': 'vector'},inplace=True)
+md_final.rename(columns = {'combined_info': 'text'}, inplace = True)
+
+# Convert Python objects into Byte stream
+md_final.to_pickle('movies.pkl')
+
+
+
+
+
+
+
 
 
 
