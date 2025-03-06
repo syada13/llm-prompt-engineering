@@ -1,6 +1,11 @@
 import pandas as pd
 import ast
 
+from lancedb.embeddings import OpenAIEmbeddings
+from streamlit import connection
+
+from prompting.general_prompting_principles.use_delimeters import query
+
 # 1. Data Preprocessing
 md = pd.read_csv("movies_metadata.csv")
 
@@ -71,7 +76,22 @@ uri = "data/sample-lancedb"
 db = lancedb.connect(uri)
 table = db.create_table("movies", md)
 
+#Build a QA recommendation chatbot in a cold-start scenario
+from langchain.vectorstores import LanceDB
+from langchain.chains import RetrievalQA
+from langchain.llms import OpenAI
 
+embeddings = OpenAIEmbeddings()
+docsearch = LanceDB(connection = table, embedding = embeddings)
+query = "I'm looking for an animated action movie. What could you suggest to me?"
+docs = docsearch.similarity_search(query)
+
+qa = RetrievalQA.from_chain_type(llm=OpenAI(), chain_type="stuff", retriever=docsearch.as_retriever(),return_source_documents=True)
+result = qa({"query": query})
+print(result['result'])
+
+#OUTPUT - ' I would suggest Transformers. It is an animated action movie with genres of Adventure, Science Fiction,
+# and Action, and a rating of 6.447283923466021.'
 
 
 
