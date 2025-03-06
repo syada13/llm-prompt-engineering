@@ -4,6 +4,7 @@ import ast
 from lancedb.embeddings import OpenAIEmbeddings
 from streamlit import connection
 
+from prompting.advance_prompting_techniques.ReAct import tools, agent_executor
 from prompting.general_prompting_principles.use_delimeters import query
 
 # 1. Data Preprocessing
@@ -98,6 +99,18 @@ df_filtered = md[md['genres'].apply(lambda x: 'Comedy' in x)]
 qa_filtered = RetrievalQA.from_chain_type(llm=OpenAI(), chain_type="stuff", retriever=docsearch.as_retriever(search_kwargs={'data': df_filtered}),return_source_documents=True)
 result_filtered = qa_filtered({"query": query})
 print(result_filtered['result_filtered'])
+
+
+# Add 'Agentic' capability to our QA
+from langchain.agents.agent_toolkits import create_retriever_tool,create_conversational_retrieval_agent
+from langchain.chat_models import ChatOpenAI
+llm = ChatOpenAI(temperature=0)
+retriever = docsearch.as_retriever(return_source_documents = True)
+tool = create_retriever_tool(retriever,"movies","Searches and returns recommendations about movies.")
+tools =[tool]
+agent_executor = create_conversational_retrieval_agent(llm,tools,verbose=True)
+agent_result = agent_executor({"input": "suggest me some action movies"})
+
 
 
 
