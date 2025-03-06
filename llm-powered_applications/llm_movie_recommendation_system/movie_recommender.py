@@ -43,7 +43,6 @@ md_final['combined_info'] = md_final.apply(lambda row: f"Title: {row['title']}. 
 
 
 #Embedding
-
 import tiktoken
 import os
 import openai
@@ -94,8 +93,11 @@ print(result['result'])
 # and Action, and a rating of 6.447283923466021.'
 
 
-
-
+#Filtering QA response based on additional attributes. Filter 'Comedy' genre movies only
+df_filtered = md[md['genres'].apply(lambda x: 'Comedy' in x)]
+qa_filtered = RetrievalQA.from_chain_type(llm=OpenAI(), chain_type="stuff", retriever=docsearch.as_retriever(search_kwargs={'data': df_filtered}),return_source_documents=True)
+result_filtered = qa_filtered({"query": query})
+print(result_filtered['result_filtered'])
 
 
 
